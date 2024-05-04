@@ -1,12 +1,6 @@
 from bson import ObjectId
-from pymongo.mongo_client import MongoClient
-from pymongo.server_api import ServerApi
-
-uri = "mongodb+srv://<user>:<senha>@<nome_colecao>.tooadgk.mongodb.net/?retryWrites=true&w=majority&appName=<nome_colecao>"
-
-client = MongoClient(uri, server_api=ServerApi('1'))
-global db
-db = client.mercado_livre
+import conexao
+db = conexao
 
 def create_vendedor():
     #Insert
@@ -66,7 +60,6 @@ def read_all_vendedor():
         print(f'Nome vendedor: {x.get("nome")}\nSobrenome vendedor: {x.get("sobrenome")}\nCPF vendedor: {x.get("cpf")}\nProdutos: {x.get("produtos")}\n')
 
 def update_vendedor(cpf):
-    # Ler dados do vendedor
     global db
     mycol_vendedor = db.vendedor
     mycol_produto = db.produtos
@@ -91,23 +84,19 @@ def update_vendedor(cpf):
     if novo_cpf:
         mydoc["cpf"] = novo_cpf
 
-    # Verifica se o vendedor possui o array de produtos
     if "produtos" in mydoc and mydoc["produtos"]:
-        # Pergunta se quer atualizar os produtos vendidos
         atualizar_produtos = input("Deseja atualizar os produtos vendidos? (s/n): ").lower()
         
         if atualizar_produtos == 's':
             produto_antigo_id = input("Digite o id do produto a ser atualizado: ")
             novo_produto_id = input("Digite o id do novo produto: ")
 
-            # Busca o novo produto na coleção de produtos
             novo_produto = mycol_produto.find_one({"_id": ObjectId(novo_produto_id)})
             
             if novo_produto is None:
                 print("Produto não encontrado.")
                 return
 
-            # Atualiza o produto vendido correspondente na lista de produtos vendidos do vendedor
             for i, produto in enumerate(mydoc["produtos"]):
                 if produto["_id"] == ObjectId(produto_antigo_id):
                     mydoc["produtos"][i] = novo_produto
@@ -123,7 +112,6 @@ def delete_vendedor(cpf):
     mycol = db.vendedor
     myquery = {"cpf": cpf}
 
-    # Encontra o vendedor antes de deletá-lo
     vendedor = mycol.find_one(myquery)
     if vendedor is None:
         print("Vendedor não encontrado.")
@@ -131,7 +119,6 @@ def delete_vendedor(cpf):
 
     nome_vendedor = vendedor["nome"]
 
-    # Deleta o vendedor
     mycol.delete_one(myquery)
 
     print("Deletado o usuário ", nome_vendedor)

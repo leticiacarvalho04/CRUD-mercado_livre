@@ -1,11 +1,5 @@
-from pymongo.mongo_client import MongoClient
-from pymongo.server_api import ServerApi
-
-uri = "mongodb+srv://<user>:<senha>@<nome_colecao>.tooadgk.mongodb.net/?retryWrites=true&w=majority&appName=<nome_colecao>"
-
-client = MongoClient(uri, server_api=ServerApi('1'))
-global db
-db = client.mercado_livre
+import conexao
+db = conexao
 
 def create_produtos():
     #Insert

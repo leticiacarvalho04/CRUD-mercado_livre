@@ -1,11 +1,5 @@
-from pymongo.mongo_client import MongoClient
-from pymongo.server_api import ServerApi
-
-uri = "mongodb+srv://<user>:<senha>@<nome_colecao>.tooadgk.mongodb.net/?retryWrites=true&w=majority&appName=<nome_colecao>"
-
-client = MongoClient(uri, server_api=ServerApi('1'))
-global db
-db = client.mercado_livre
+import conexao
+db = conexao
 
 def create_usuario():
     #Insert
@@ -80,7 +74,6 @@ def update_usuario():
         print(f'CPF do usuário: {usuario.get("cpf")}')
         print("---------------------------------------")
 
-    # Encontrar o usuário pelo CPF
     cpf_usuario = input("Digite o CPF do usuário que deseja atualizar: ")
     usuario = mycol_usuario.find_one({"cpf": cpf_usuario})
 
@@ -88,13 +81,11 @@ def update_usuario():
         print("Usuário não encontrado.")
         return
 
-    # Solicitar as atualizações dos dados do usuário
     novo_nome = input(f"Novo nome ({usuario['nome']}): ").strip()
     novo_sobrenome = input(f"Novo sobrenome ({usuario['sobrenome']}): ").strip()
     novo_cpf = input(f"Novo CPF ({usuario['cpf']}): ").strip()
     novo_email = input(f"Novo email ({usuario['email']}): ").strip()
 
-    # Atualizar os endereços do usuário
     novos_enderecos = []
     for endereco in usuario['endereco']:
         print("\nEndereço atual:")
@@ -125,7 +116,6 @@ def update_usuario():
         else:
             novos_enderecos.append(endereco)
 
-    # Atualizar os dados do usuário
     novos_dados_usuario = {
         "nome": novo_nome if novo_nome else usuario['nome'],
         "sobrenome": novo_sobrenome if novo_sobrenome else usuario['sobrenome'],
@@ -134,7 +124,6 @@ def update_usuario():
         "endereco": novos_enderecos
     }
 
-    # Atualizar o documento do usuário no banco de dados
     mycol_usuario.update_one({"_id": usuario["_id"]}, {"$set": novos_dados_usuario})
 
     print("Usuário atualizado com sucesso!")
@@ -152,5 +141,5 @@ def delete_usuario(cpf):
 
     nome_usuario = usuario["nome"]
 
-    mydoc = mycol.delete_one(myquery)
+    mycol.delete_one(myquery)
     print("Deletado o usuário ",nome_usuario)

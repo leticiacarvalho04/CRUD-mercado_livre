@@ -1,12 +1,7 @@
 from bson import ObjectId
-from pymongo.mongo_client import MongoClient
-from pymongo.server_api import ServerApi
+import conexao
 
-uri = "mongodb+srv://<user>:<senha>@<nome_colecao>.tooadgk.mongodb.net/?retryWrites=true&w=majority&appName=<nome_colecao>"
-
-client = MongoClient(uri, server_api=ServerApi('1'))
-global db
-db = client.mercado_livre
+db = conexao
 
 def create_favoritos():
     # Insert
@@ -28,14 +23,12 @@ def create_favoritos():
         print("Produto não encontrado.")
         return
 
-    # Transforma 'favoritos' em um array se for um objeto
     if not isinstance(cliente.get('favoritos'), list):
         mycol_usuario.update_one(
             {"_id": cliente["_id"]},
             {"$set": {"favoritos": []}}
         )
 
-    # Adiciona o novo produto aos 'favoritos'
     result = mycol_usuario.update_one(
         {"_id": cliente["_id"]},
         {"$addToSet": {"favoritos": {
@@ -57,21 +50,19 @@ def read_all_favoritos():
     
     print("Clientes e seus favoritos: ")
     
-    # Encontra todos os clientes
     clientes = clientes_col.find()
     
     for cliente in clientes:
-        cliente_nome = cliente["nome"]  # Supondo que o campo do nome do cliente é "nome"
+        cliente_nome = cliente["nome"]  
         
         print(f"Cliente: {cliente_nome}")
         
-        # Verifica se o campo "favoritos" existe no cliente
         if "favoritos" in cliente:
-            favoritos = cliente.get("favoritos", [])  # Obtém o array "favoritos" ou uma lista vazia se não existir
+            favoritos = cliente.get("favoritos", [])  
             
             print("Favoritos:")
             for favorito in favoritos:
-                print(f"- {favorito}")  # Imprime cada favorito do array "favoritos"
+                print(f"- {favorito}") 
         else:
             print("Sem favoritos.")
         
@@ -81,15 +72,13 @@ def read_favoritos(cpf):
     global db
     clientes_col = db.usuarios
     
-    # Busca o cliente pelo CPF
-    cliente = clientes_col.find_one({"cpf": cpf})  # Supondo que o campo do CPF é "cpf"
+    cliente = clientes_col.find_one({"cpf": cpf}) 
     
     if cliente:
-        cliente_nome = cliente["nome"]  # Supondo que o campo do nome do cliente é "nome"
+        cliente_nome = cliente["nome"]  
         
         print(f"Favoritos do cliente {cliente_nome} (CPF: {cpf}):")
         
-        # Verifica se o campo "favoritos" existe no cliente
         if "favoritos" in cliente:
             favoritos = cliente["favoritos"]
             
@@ -109,10 +98,8 @@ def update_favoritos():
     mycol_usuario = db.usuarios
     mycol_produto = db.produtos
 
-    # Buscar clientes que possuem favoritos
     clientes_com_favoritos = mycol_usuario.find({"favoritos": {"$exists": True, "$ne": []}})
     
-    # Listar clientes que possuem favoritos
     for cliente in clientes_com_favoritos:
         print(f'Nome do cliente: {cliente.get("nome")}')
         print(f'CPF do cliente: {cliente.get("cpf")}')
@@ -128,7 +115,6 @@ def update_favoritos():
         print("Cliente não encontrado.")
         return
 
-    # Buscar o objeto de favorito pelo ID antigo
     favorito_antigo_obj = [fav for fav in cliente['favoritos'] if fav['produto_id'] == favorito_antigo]
     
     if not favorito_antigo_obj:
@@ -140,18 +126,16 @@ def update_favoritos():
         print("Novo produto não encontrado.")
         return
 
-    # Solicitar quantidade de parcelas
     quantidade_parcelas = int(input("Digite a quantidade de parcelas desejadas: "))
 
     try:
-        # Atualiza o favorito
         result = mycol_usuario.update_one(
             {"cpf": cpf_cliente, "favoritos.produto_id": favorito_antigo},
             {"$set": {"favoritos.$": {
                 "produto_id": novo_produto_id,
                 "nome": novo_produto_obj["nome"],
                 "preco": novo_produto_obj["preco"],
-                "parcelas": quantidade_parcelas  # Adiciona o campo 'parcelas'
+                "parcelas": quantidade_parcelas 
             }}}
         )
 
@@ -180,7 +164,6 @@ def delete_favoritos():
         print("Cliente não encontrado.")
         return
 
-    # Verifica se o favorito existe na lista de favoritos do cliente
     favorito_existe = any(favorito for favorito in cliente["favoritos"] if favorito["nome"] == nome_favorito)
     if not favorito_existe:
         print("Favorito não encontrado.")
@@ -191,10 +174,8 @@ def delete_favoritos():
         print("Operação cancelada.")
         return
 
-    # Remove o favorito da lista de favoritos do cliente
     cliente["favoritos"] = [favorito for favorito in cliente["favoritos"] if favorito["nome"] != nome_favorito]
 
-    # Atualiza o documento do cliente no banco de dados
     result = mycol.update_one({"_id": cliente["_id"]}, {"$set": {"favoritos": cliente["favoritos"]}})
     if result.modified_count > 0:
         print("Favorito deletado com sucesso!")

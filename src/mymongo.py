@@ -1,7 +1,7 @@
 import pymongo
 from pymongo.server_api import ServerApi
 
-client = pymongo.MongoClient("mongodb+srv://<user>:<senha>@<nome_colecao>.tooadgk.mongodb.net/?retryWrites=true&w=majority&appName=<nome_colecao>", server_api=ServerApi('1'))
+client = pymongo.MongoClient("mongodb+srv://<email>:<password>@<bd>.tooadgk.mongodb.net/?retryWrites=true&w=majority&appName=<bd>", server_api=ServerApi('1'))
 db = client.test
 
 global mydb
@@ -41,4 +41,3 @@ def insert(nome, cpf):
 findSort()
 findQuery()
 insert("Mane eh mane", "123.123.123.11")
-
